@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class ellipsoid:
     def __init__(self, I_x, I_y, I_z, density):
@@ -14,4 +13,4 @@ class ellipsoid:
 
         for i in range(len(self.mass_quadrupole)):
             for j in range(len(self.mass_quadrupole[i])):
-                self.mass_quadrupole[i, j] = 
+                self.mass_quadrupole[i, j] =
