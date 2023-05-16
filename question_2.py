@@ -1,7 +1,7 @@
 import numpy as np
 
 class Template:
-    def __init__(self, theta=np.pi/4, phi=0, iota=0, f_rot0=0, df_dt=-1, I_3=(2/5) * (1.4 * 2 * 1e30) * (1.2 * 1e4)**2, epsilon=0, r=3.086e+19):  #spoofed 10 times closer
+    def __init__(self, theta=np.pi/4, phi=0, iota=0, f_rot0=0, df_dt=-1, I_3=(2/5) * (1.4 * 2 * 1e30) * (1.2 * 1e4)**2, epsilon=0, r=3.086e+20):  #spoofed 10 times closer
         self.theta = theta
         self.phi = phi
         self.iota = iota
@@ -15,7 +15,7 @@ class Template:
         self.c = 3e8 # m s^-1
 
     def __call__(self, t):
-        self.f_gw = self.df_dt * t + self.f_rot0
+        self.f_gw = self.df_dt * t + 2*self.f_rot0
         self.h_0 = 4 * np.pi ** 2 * self.G / self.c ** 4 * self.I_3 * self.f_rot0 ** 2 / self.r * self.epsilon
 
         h_plus = (1/2) * (1 + np.cos(self.theta)**2) * np.cos(2*self.phi) * self.h_0 * (1 + np.cos(self.iota)**2) / 2 * np.cos(2 * np.pi * self.f_gw * t)
@@ -26,11 +26,11 @@ class Template:
         return h
 
 class InnerProduct:
-    def __init__(self, frequency=182, sensitivity=1e-24):
+    def __init__(self, frequency=2 * 182, sensitivity=(1e-24)**2):
         self.frequency = frequency
         self.sensitivity = sensitivity
 
-        self.sigma = sensitivity / frequency**2
+        self.sigma = np.sqrt(sensitivity) / frequency
 
     def __call__(self, signal, model):
         result = np.sum((signal - model) ** 2 / (len(signal) * self.sigma ** 2))
