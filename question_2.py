@@ -14,8 +14,6 @@ class Template:
         self.G = 1
         self.c = 1
 
-
-
     def __call__(self, t):
         self.f_gw = self.df_dt * t + self.f_rot0
         self.h_0 = 4 * np.pi ** 2 * self.G / self.c ** 4 * self.I_3 * self.f_gw ** 2 / self.r * self.epsilon
@@ -29,7 +27,21 @@ class Template:
         return h
 
 class InnerProduct:
-    def __init__(self, frequency, sensitivity):
+    def __init__(self, frequency=182, sensitivity=1e-23):
         self.frequency = frequency
         self.sensitivity = sensitivity
 
+        self.sigma = sensitivity / frequency**2
+
+    def __call__(self, signal, template):
+        result = np.sum((signal - template)**2 / (len(signal) * self.sigma**2))
+        return result
+
+class Likelihood:
+    def __init__(self):
+        pass
+    def __call__(self, signal, template):
+        inner_product = InnerProduct()
+        residual = signal - template
+        result = np.exp((-1/2) * inner_product(residual))
+        return result
