@@ -5,8 +5,6 @@ import seaborn as sns
 from question_2 import Template, Likelihood
 from data_loader import Data
 
-print(sns.__version__)
-
 filepath = 'simple-cw-master/'
 filename = 'cw_' + 'example' + '.csv'
 
@@ -16,11 +14,11 @@ data = Data(filepath + filename)
 
 iterations = 10000
 
-# df_dt_guesses = np.random.uniform(low=1e-7, high=1e-3, size=iterations)
-# epsilon_guesses = np.random.uniform(low=1e-8, high=1e-4, size=iterations)
-
-df_dt_guesses = np.random.normal(loc=1e-4, scale=1e-5, size=iterations)
+df_dt_guesses = np.random.uniform(low=1e-7, high=1e-3, size=iterations)
 epsilon_guesses = np.random.uniform(low=1e-8, high=1e-4, size=iterations)
+
+# df_dt_guesses = np.random.normal(loc=1e-4, scale=1e-5, size=iterations)
+# epsilon_guesses = np.random.uniform(low=1e-8, high=1e-4, size=iterations)
 
 likelihoods = np.zeros(iterations)
 
@@ -74,3 +72,7 @@ plt.xlabel('df_dt')
 plt.ylabel('epsilon')
 plt.show()
 
+def effective_samples(likelihoods):
+    return np.sum(likelihoods)**2 / np.sum(likelihoods**2)
+
+print(effective_samples(likelihoods))
