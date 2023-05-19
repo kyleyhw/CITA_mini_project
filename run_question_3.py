@@ -3,29 +3,31 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import emcee
 
-from question_2 import Template, Likelihood
+from question_3 import LogProb
 from data_loader import Data
+
+log_prob = LogProb()
 
 filepath = 'simple-cw-master/'
 filename = 'cw_' + 'example' + '.csv'
-
-Likelihood = Likelihood()
 
 data = Data(filepath + filename)
 
 ndim = 2
 nwalkers = 32
-p0 = np.random.uniform(nwalkers, ndim)
+p0 = np.random.uniform(size=(nwalkers, ndim), low=(1e-8, 1e-7), high=(1e-4, 1e-3))
 
-sampler = emcee.EnsembleSampler(nwalkers, ndim, Likelihood)
+sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, args=[data.times, data.signal])
 
-state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-
-sampler.run_mcmc(state, 10000)
+sampler.run_mcmc(p0, 10)
 
 samples = sampler.get_chain(flat=True)
-plt.hist(samples[:, 0], 100, color="k", histtype="step")
-plt.xlabel(r"$\theta_1$")
-plt.ylabel(r"$p(\theta_1)$")
-plt.gca().set_yticks([])
+print(samples.shape)
+print(samples[0])
+
+epsilon_walk = samples.T[0]
+df_dt_walk = samples.T[1]
+
+plt.figure()
+plt.plot(epsilon_walk, df_dt_walk)
+plt.show()
