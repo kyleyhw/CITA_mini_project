@@ -24,7 +24,7 @@ class Template:
 
         h = h_plus + h_cross
 
-        spin_down_limit = 2 * self.c**3 * self.h_0 * self.r**2 * self.f_rot0 / (5 * self.G * self.I_3)
+
 
         return h
 
@@ -47,9 +47,24 @@ class Likelihood:
         result = np.exp((-1/2) * inner_product(signal, model))
         return result
 
+class UniformPrior:
+    def __init__(self, lower_bounds, upper_bounds):
+        self.dims = len(upper_bounds)
+        self.upper_bounds = upper_bounds
+        self.lower_bounds = lower_bounds
+
+    def __call__(self, params):
+        result = 1
+        for i in range(self.dims):
+            if (self.lower_bounds[i] > params[i]) or (params[i] > self.upper_bounds[i]):
+                result = 0
+        return result
+
+
 class LogProb:
-    def __init__(self):
-        pass
+    def __init__(self, likelihood, prior):
+        self.likelihood = likelihood
+        self.prior = prior
 
     def __call__(self, p0, times, signal):
         self.epsilon_guess = p0[0]
@@ -57,10 +72,9 @@ class LogProb:
 
         template = Template(epsilon=self.epsilon_guess, df_dt=self.df_dt_guess)
         model = template(times)
-        likelihood = Likelihood()
-        prob = likelihood(signal, model)
+        log_prob = np.log(self.likelihood(signal, model)) + np.log(self.prior((self.epsilon_guess, self.df_dt_guess)))
 
-        return np.log(prob)
+        return log_prob
 
 
 class AutocorrelationTime:
