@@ -24,6 +24,8 @@ class Template:
 
         h = h_plus + h_cross
 
+        spin_down_limit = 2 * self.c**3 * self.h_0 * self.r**2 * self.f_rot0 / (5 * self.G * self.I_3)
+
         return h
 
 class InnerProduct:
@@ -59,3 +61,27 @@ class LogProb:
         prob = likelihood(signal, model)
 
         return np.log(prob)
+
+
+class AutocorrelationTime:
+    def __init__(self, chain):
+        self.chain = chain
+        self.truth = chain[-1]
+        self.n = len(self.chain)
+
+        self.tau = 0
+        for t in range(self.n):
+            self.tau += self.A(t)
+        self.tau *=2
+
+
+    def C(self, t):
+        sum = 0
+        i=0
+        while (i + t) < self.n:
+            sum += np.dot((self.chain[i] - self.truth), (self.chain[i + t] - self.truth))
+            i +=1
+        return sum
+
+    def A(self, t):
+        return self.C(t) / self.C(0)
