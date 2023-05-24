@@ -54,11 +54,10 @@ class UniformPrior:
         self.lower_bounds = lower_bounds
 
     def __call__(self, params):
-        result = 1
         for i in range(self.dims):
             if (self.lower_bounds[i] > params[i]) or (params[i] > self.upper_bounds[i]):
-                result = 0
-        return result
+                return 1e-10
+        return 1
 
 
 class LogProb:
