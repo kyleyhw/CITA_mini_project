@@ -89,6 +89,9 @@ class AutocorrelationTime:
     def C(self, t):
         sum = 0
         i=0
+
+        filter = np.where((i + t) < self.n)
+
         while (i + t) < self.n:
             sum += np.dot((self.chain[i] - self.truth), (self.chain[i + t] - self.truth))
             i +=1
