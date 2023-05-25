@@ -23,6 +23,8 @@ epsilon_guesses = np.random.uniform(low=1e-8, high=1e-4, size=iterations)
 likelihoods = np.zeros(iterations)
 
 for i in range(iterations):
+    if i % 1000 == 0:
+        print(i)
     template = Template(df_dt=df_dt_guesses[i], epsilon=epsilon_guesses[i], f_rot0=data.f_rot0)
 
     model = template(data.times)
@@ -66,8 +68,8 @@ for i in range(iterations):
 
 
 plt.figure()
-plt.scatter(df_dt_guesses, epsilon_guesses, c=likelihoods, alpha=0.1)
-sns.kdeplot(x=df_dt_guesses, y=epsilon_guesses, weights=likelihoods / np.sum(likelihoods), levels=[0.1])
+plt.scatter(df_dt_guesses, epsilon_guesses, c=likelihoods, alpha=0.5, cmap='Greys')
+sns.kdeplot(x=df_dt_guesses, y=epsilon_guesses, weights=likelihoods / np.sum(likelihoods), levels=[0.5])
 plt.xlabel('df_dt')
 plt.ylabel('epsilon')
 plt.show()

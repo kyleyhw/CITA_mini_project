@@ -24,8 +24,6 @@ class Template:
 
         h = h_plus + h_cross
 
-
-
         return h
 
 class InnerProduct:
@@ -56,7 +54,7 @@ class UniformPrior:
     def __call__(self, params):
         for i in range(self.dims):
             if (self.lower_bounds[i] > params[i]) or (params[i] > self.upper_bounds[i]):
-                return 1e-10
+                return 0
         return 1
 
 
@@ -65,15 +63,17 @@ class LogProb:
         self.likelihood = likelihood
         self.prior = prior
 
-    def __call__(self, p0, times, signal):
+    def __call__(self, p0, times, signal, f_rot0):
         self.epsilon_guess = p0[0]
         self.df_dt_guess = p0[1]
 
-        template = Template(epsilon=self.epsilon_guess, df_dt=self.df_dt_guess)
+        template = Template(epsilon=self.epsilon_guess, df_dt=self.df_dt_guess, f_rot0=f_rot0)
         model = template(times)
-        log_prob = np.log(self.likelihood(signal, model)) + np.log(self.prior((self.epsilon_guess, self.df_dt_guess)))
+        log_like = np.log(self.likelihood(signal, model))
+        log_prior = np.log(self.prior((self.epsilon_guess, self.df_dt_guess)))
+        log_prob = log_like + log_prior
 
-        return log_prob
+        return log_prob, log_like
 
 
 class AutocorrelationTime:
@@ -83,10 +83,8 @@ class AutocorrelationTime:
         self.n = len(self.chain)
 
         self.tau = 0
-        for t in range(self.n):
-            self.tau += self.A(t)
-        self.tau *=2
-
+        t = np.arange(self.n)
+        self.tau = 2 * np.sum(self.A(t))
 
     def C(self, t):
         sum = 0
