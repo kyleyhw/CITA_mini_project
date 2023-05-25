@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import emcee
 
-from question_3 import UniformPrior, Likelihood, LogProb, AutocorrelationTime
+from question_3 import UniformPrior, Likelihood, LogProb, AutocorrelationTime, Template
 from data_loader import Data
 
 filepath = 'simple-cw-master/'
@@ -13,7 +13,7 @@ data = Data(filepath + filename)
 
 ndim = 2
 nwalkers = 4
-steps = 100000
+steps = 10
 
 prior_lower_bounds = (1e-7, 1e-5)
 prior_upper_bounds = (1e-5, 1e-3)
@@ -39,33 +39,53 @@ df_dt_points = flat_samples[:, 1]
 epsilon_walk = samples[:, :, 0]
 df_dt_walk = samples[:, :, 1]
 
-plt.figure()
+# plt.figure()
+#
+# plt.plot(epsilon_walk, df_dt_walk, alpha=0.05)
+# sns.kdeplot(x=epsilon_points, y=df_dt_points, levels=[0.9])
+# plt.hist2d(x=epsilon_points, y=df_dt_points, bins=32, cmap='gray')
+# plt.colorbar()
+#
+# plt.scatter([1e-6], [1e-4], label='true value', color='white', marker='x')
+# plt.legend()
+#
+# plt.xlabel(r'\epsilon')
+# plt.ylabel(r'\dot{f}')
+#
+# plt.show()
 
-plt.plot(epsilon_walk, df_dt_walk, alpha=0.05)
-sns.kdeplot(x=epsilon_points, y=df_dt_points, levels=[0.9])
-plt.hist2d(x=epsilon_points, y=df_dt_points, bins=32, cmap='gray')
-plt.colorbar()
-
-plt.scatter([1e-6], [1e-4], label='true value', color='white', marker='o')
-plt.legend()
-
-plt.xlabel(r'\epsilon')
-plt.ylabel(r'\dot{f}')
-
-plt.show()
-
-samples = np.swapaxes(samples, 0, 1)
-for i, chain in enumerate(samples):
-    autocorrelation_time = AutocorrelationTime(chain)
-    print('autocorrelation time for chain %i:' %i, autocorrelation_time.tau)
+# samples = np.swapaxes(samples, 0, 1)
+# for i, chain in enumerate(samples):
+#     autocorrelation_time = AutocorrelationTime(chain)
+#     print('autocorrelation time for chain %i:' %i, autocorrelation_time.tau)
 
 
-fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1)
+# fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1)
+#
+# for chain in samples:
+#     ax1.plot(chain.T[0], alpha=0.05)
+#     ax2.plot(chain.T[1], alpha=0.05)
+#
+# ax1.set_title('epsilon')
+# ax2.set_title('df_dt')
+# plt.show()
 
-for chain in samples:
-    ax1.plot(chain.T[0], alpha=0.05)
-    ax2.plot(chain.T[1], alpha=0.05)
 
-ax1.set_title('epsilon')
-ax2.set_title('df_dt')
-plt.show()
+epsilon_grid = np.linspace(prior_lower_bounds[0], prior_upper_bounds[0], 4)
+df_dt_grid = np.linspace(prior_lower_bounds[1], prior_upper_bounds[1], 4)
+
+likelihoods = []
+
+for x in epsilon_grid:
+    for y in df_dt_grid:
+        template = Template(epsilon=x, df_dt=y)
+        model = template(data.times)
+        likelihoods.append(likelihood(data.signal, model))
+
+likelihoods = np.array(likelihoods).reshape(grid.shape)
+
+print(likelihoods)
+
+grid = np.meshgrid(epsilon_grid, df_dt_grid)
+
+print(grid)

@@ -12,7 +12,7 @@ Likelihood = Likelihood()
 
 data = Data(filepath + filename)
 
-iterations = 10000
+iterations = 5000
 
 df_dt_guesses = np.random.uniform(low=1e-7, high=1e-3, size=iterations)
 epsilon_guesses = np.random.uniform(low=1e-8, high=1e-4, size=iterations)
