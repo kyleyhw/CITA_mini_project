@@ -80,6 +80,7 @@ class AutocorrelationTime:
     def __init__(self, chain):
         self.chain = chain
         self.truth = chain[-1]
+        self.params = len(self.truth)
         self.n = len(self.chain)
 
         self.tau = 0
@@ -87,15 +88,21 @@ class AutocorrelationTime:
         self.tau = 2 * np.sum(self.A(t))
 
     def C(self, t):
-        sum = 0
-        i=0
+        matrix_dims = self.n - np.max(t)
+        print(matrix_dims, self.params)
+        first_matrix = np.zeros(shape=(matrix_dims, self.params))
+        second_matrix = np.zeros(shape=(self.params, matrix_dims))
 
-        filter = np.where((i + t) < self.n)
+        for i in range(matrix_dims):
+            first_matrix[i] = self.chain[i]
+            second_matrix[i] = self.chain[i + t]
 
-        while (i + t) < self.n:
-            sum += np.dot((self.chain[i] - self.truth), (self.chain[i + t] - self.truth))
-            i +=1
-        return sum
+        result_vector = first_matrix @ second_matrix
+
+        result = np.sum(result_vector)
+
+        return result
+
 
     def A(self, t):
         return self.C(t) / self.C(0)

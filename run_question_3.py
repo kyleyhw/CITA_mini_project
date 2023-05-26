@@ -13,7 +13,7 @@ data = Data(filepath + filename)
 
 ndim = 2
 nwalkers = 4
-steps = 10000
+steps = 100
 # (epsilon, fdot): true value for epsilon is 1e-6, true value for fdot is 1e-4
 # prior_lower_bounds = (0.9e-6, 0.9e-4)
 # prior_upper_bounds = (1.1e-6, 1.1e-4)
@@ -59,9 +59,9 @@ plt.show()
 
 samples = np.swapaxes(samples, 0, 1) # gives chains of parameter vectors, to incorporate Speagle definition of autocorrelation time
 
-# for i, chain in enumerate(samples):
-#     autocorrelation_time = AutocorrelationTime(chain)
-#     print('autocorrelation time for chain %i:' %i, autocorrelation_time.tau)
+for i, chain in enumerate(samples):
+    autocorrelation_time = AutocorrelationTime(chain)
+    print('autocorrelation time for chain %i:' %i, autocorrelation_time.tau)
 
 
 fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1) # trace plots for each parameter
@@ -76,5 +76,5 @@ ax1.set_title('epsilon')
 ax2.set_title('df_dt')
 plt.show()
 
-# blobs = sampler.get_blobs()
-# print(blobs['log_like'])
+blobs = sampler.get_blobs()
+print(blobs['log_like'])
