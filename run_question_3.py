@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import emcee
 
-from question_3 import UniformPrior, Likelihood, LogProb, AutocorrelationTime, Template
+from question_3 import LogPrior, Likelihood, LogProb, AutocorrelationTime, Template
 from data_loader import Data
 
 filepath = 'simple-cw-master/'
@@ -21,7 +21,7 @@ steps = 100
 prior_lower_bounds = (0, 0)
 prior_upper_bounds = (1e-4, 1e-3)
 
-prior = UniformPrior(lower_bounds=prior_lower_bounds, upper_bounds=prior_upper_bounds) # initialize the prior, which is uniform (1 in allowed region, 0 otherwise)
+prior = LogPrior(lower_bounds=prior_lower_bounds, upper_bounds=prior_upper_bounds) # initialize the prior, which is uniform (1 in allowed region, 0 otherwise)
 likelihood = Likelihood() # initialize likelihood function
 log_prob = LogProb(likelihood=likelihood, prior=prior) # pass likelihood function and prior into log_probability, where log_prob = log_likelihood + log_prior
 

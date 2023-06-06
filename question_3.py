@@ -57,6 +57,25 @@ class UniformPrior:
                 return 0
         return 1
 
+class LogLike:
+    def __init__(self):
+        pass
+    def __call__(self, signal, model):
+        inner_product = InnerProduct()
+        result = (-1/2) * inner_product(signal, model)
+        return result
+
+class LogPrior:
+    def __init__(self, lower_bounds, upper_bounds):
+        self.dims = len(upper_bounds)
+        self.upper_bounds = upper_bounds
+        self.lower_bounds = lower_bounds
+
+    def __call__(self, params):
+        for i in range(self.dims):
+            if (self.lower_bounds[i] > params[i]) or (params[i] > self.upper_bounds[i]):
+                return -np.inf
+        return 0
 
 class LogProb:
     def __init__(self, likelihood, prior):
@@ -69,8 +88,8 @@ class LogProb:
 
         template = Template(epsilon=self.epsilon_guess, df_dt=self.df_dt_guess, f_rot0=f_rot0)
         model = template(times)
-        log_like = np.log(self.likelihood(signal, model))
-        log_prior = np.log(self.prior((self.epsilon_guess, self.df_dt_guess)))
+        log_like = LogLike(signal=signal, model=model)
+        log_prior = self.prior((self.epsilon_guess, self.df_dt_guess))
         log_prob = log_like + log_prior
 
         return log_prob, log_like
