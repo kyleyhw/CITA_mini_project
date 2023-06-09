@@ -17,7 +17,9 @@ class Template:
 
     def __call__(self, t):
         self.f_gw = self.df_dt * t + 2*self.f_rot0
-        self.h_0 = 4 * np.pi ** 2 * self.G / self.c ** 4 * self.I_3 * self.f_rot0 ** 2 / self.r * self.epsilon
+        self.h_0 = 4 * np.pi ** 2 * self.G / self.c ** 4 * self.I_3 * (2 * self.f_rot0) ** 2 / self.r * self.epsilon
+
+        print('for (epsilon, fdot) = (%f, %f), h_0 * 1e30 = %f' %(self.epsilon, self.df_dt, self.h_0 * 1e30))
 
         h_plus = (1/2) * (1 + np.cos(self.theta)**2) * np.cos(2*self.phi) * self.h_0 * (1 + np.cos(self.iota)**2) / 2 * np.cos(2 * np.pi * self.f_gw * t)
         h_cross = np.cos(self.theta) * np.sin(2 * self.phi) * self.h_0 * np.cos(self.iota) * np.sin(2 * np.pi * self.f_gw * t)
@@ -78,9 +80,9 @@ class LogPrior:
         return 0
 
 class LogProb:
-    def __init__(self, likelihood, prior):
-        self.likelihood = likelihood
-        self.prior = prior
+    def __init__(self, log_likelihood, log_prior):
+        self.log_likelihood = log_likelihood
+        self.log_prior = log_prior
 
     def __call__(self, p0, times, signal, f_rot0):
         self.epsilon_guess = p0[0]
@@ -88,8 +90,8 @@ class LogProb:
 
         template = Template(epsilon=self.epsilon_guess, df_dt=self.df_dt_guess, f_rot0=f_rot0)
         model = template(times)
-        log_like = LogLike(signal=signal, model=model)
-        log_prior = self.prior((self.epsilon_guess, self.df_dt_guess))
+        log_like = self.log_likelihood(signal=signal, model=model)
+        log_prior = self.log_prior((self.epsilon_guess, self.df_dt_guess))
         log_prob = log_like + log_prior
 
         return log_prob, log_like
